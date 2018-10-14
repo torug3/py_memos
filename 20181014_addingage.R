@@ -1,8 +1,8 @@
 #tidyverse‚Ì“Ç‚İ‚İ
 library(tidyverse)
 
-setwd("C:/Users/torug/Desktop/forR")
-lung <- read.csv("lung2017.csv")
+setwd("**:/****/***/****/***")
+lung <- read.csv("*****.csv")
 
 #¶”NŒ“ú‚ğ“ú•tŒ^‚É•ÏŠ·
 birth <- as.Date(lung$¶”NŒ“ú)

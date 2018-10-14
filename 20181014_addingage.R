@@ -1,11 +1,14 @@
 #tidyverse‚Ì“Ç‚İ‚İ
 library(tidyverse)
 
-setwd("**:/****/***/****/***")
-lung <- read.csv("*****.csv")
+setwd("*:/*****/***/***/****")
+lung <- read.csv("****.csv")
 
 #¶”NŒ“ú‚ğ“ú•tŒ^‚É•ÏŠ·
 birth <- as.Date(lung$¶”NŒ“ú)
+
+#Œ»İ“ú•t‚ğİ’è
+current <- rep(as.Date("2018-10-01"),length(birth))
 
 #”N—î‚ğŒvZ‚µ‚Ä—ñ’Ç‰Á
 #Ši”[êŠ‚ğ—\–ñ

@@ -1,6 +1,5 @@
 #ƒ‰ƒCƒuƒ‰ƒŠ
 library(ggplot2)
-library(dplyr)
 library(sf)
 library(viridis)
 

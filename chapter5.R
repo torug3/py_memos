@@ -255,6 +255,9 @@ dft <- tibble(
 dft
 
 #練習１
+#target1の"xxx100ml 2unit"の、
+#unit前の数字をぬきだしてください。
+
 #わからん。これだといけるのに
 dft$target1 %>% str_extract("\\d+(?=unit)")
 
@@ -266,8 +269,13 @@ str_detect(dft$target1,"\\d")
 #これもダメ
 dft$target1 %>% filter(str_detect(dft$target1,"//d"))
 
+
+#練習2 target1の"xxx100ml 2unit"の、
+#ml前の数字をぬきだしてください。
 #練習２は1と同じ。unitがmlにかわるだけ
-#練習３
+
+#練習３ target1の"xxx100ml 2unit"の、
+#xxx部分を抜き出して下さい。
 
 #これが一応正解みたい
 dft$target1 %>% str_extract("[a-z]+(?=\\d)")
@@ -276,21 +284,128 @@ dft$target1 %>% str_extract("^[a-z]+(?=\\d)")
 #これだとだめなのは何でだろう
 dft$target1 %>% str_extract("^\\w+(?=\\d)")
 dft$target1 %>% str_extract("\\w+")
-#練習4
+
+#練習4 target2の検査結果のみを抜き出してください。
 dft$target2 %>% str_extract("\\d+")
 dft
 str_detect(dft$target2 %>% 
-#練習5
+
+#練習5 target2の単位を抜き出して下さい
 #".+"ですべての文字の繰り返し
 #str_replace、マッチした結果を別の文字列に置き換えることができる
 #置き換えの対象を指定しなければ（空白にすれば）
 
 #練習６，７、
+#6 target3の手術名を抜き出して下さい
+#7 target3の出血量をぬきだしてください。
+
 #正規表現については復習の必要大いにあり
 
 #5-91 正規表現の補足
 #日本語の問題と全角数字の問題
 #"Nippon"というライブラリを使えば全角から半角へ変換ができる
 
-#5-92 if_elseとcase_when
-q()
+
+#5-92、5-93 if_elseとcase_when
+#20190112
+
+dfif <- tibble(num =c(1:10))
+
+dfif <- dfif %>% mutate(bool = num>5)
+dfif
+#mutateってlogicalを返すの？
+
+#if_elseはBooleanを判断して、TRUEとFALSEで処理をわける関数
+
+if_else(TRUE, "trueです", "falseです")
+cc<-3
+if_else(cc==3, "trueです", "falseです")
+
+#３番目にはNAのときに返す値を指定できる
+if_else(c(TRUE,NA,FALSE), "trueだよ", "falseだよ", "NAだよ")
+
+
+#これとmutateを組み合わせると、
+dfif %>%   mutate(bool = num>4)
+
+dfif %>% 
+  mutate(bool = num>4) %>% 
+  mutate(kekka = if_else(bool, "4より大きいよ", "4より小さいよ"))
+
+dfif %>% mutate(kekka = if_else(num<4,"4より大きいよ", "4より小さいよ"))
+dfif <- dfif %>% select(-bool)
+
+#でもOK
+
+#if_elseの返す値は同じ「型」でないとだめ
+#これだとだめで
+dfif %>% mutate(kekka = if_else(num<3,　0　,">=3"))
+
+#こうしとかないといけない
+dfif %>% mutate(kekka = if_else(num<3,"0",">=3"))
+
+#ちなみにNAの場合に「NA」を返したい、とすると、
+#これはもちろんダメ
+dfif %>% mutate(kekka = if_else(num<3,"0",">=3",NA))
+
+#これでOK
+#だけど、
+dfif %>% mutate(kekka = if_else(num<3,"0",">=3","NA"))
+
+#こういうのもできる
+#NAはlogical（上参照）
+dfif %>% mutate(kekka = if_else(num<3,"0",">=3",NA_character_))
+
+#5-101,20190113
+#dplyrに#band_members と　band_instrumentsが入っている
+library(dplyr)
+band_members
+band_instruments
+band_instruments2
+
+
+left_join(band_members, band_instruments, by="name")
+#Keithは元のband_membersにいないので列には出てこない
+#（left_joinの特徴）
+
+#これでもOK
+left_join(band_members, band_instruments, by = c("name" = "name"))
+band_members %>% left_join(band_instruments, by = "name")
+
+#これだと当然エラーになるので
+left_join(band_members, band_instruments2, by = "name")
+#ちなみにRHS=right hand side
+
+#コラム名が、artist とplayerで、artistを利用したいので、
+left_join(band_members, band_instruments2, by=c("name"="artist"))
+#これでもOK
+band_members %>% left_join(band_instruments2,　by =c("name" = "artist"))
+
+
+#joinは基本４種類
+
+#inner_joinは両方にあるものだけが残る
+inner_join(band_members, band_instruments, by="name")
+
+#left_joinは左にあるものを残す（上記参照）
+
+#right_joinはその逆、右にあるものを残す
+right_join(band_members, band_instruments, by="name")
+
+#full_joinはどちらかにあるものを残す（どちらか片方にあるものを残す）
+full_join(band_members, band_instruments, by="name")
+
+#5-102って101と同じ？
+
+
+#6-111
+#かっこの名前
+#()parenthesis(パレンセシス)
+#括弧は2つで1セットなので複数形 parentheses（パレンセシーズ） での使用が普通
+#[]bracket
+#{}curly bracket（カーリーブラケット）
+
+#6-112、最小二乗法（LSM）
+#ある新聞広告は売り上げにつながっているのか？
+
+

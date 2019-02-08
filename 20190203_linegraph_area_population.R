@@ -5,12 +5,16 @@ library(dplyr)
 library(reshape2)#for melt
 
 #前処理として各ファイル（CSV）を「名前を付けてCSV」で保存し直す必要あり
+
+#ファイル名用にベクトル作成
+time <- c("1809","1803","1709","1703","1609","1603","1509")
+time2 <- c("201809","201803","201709","201703","201609","201603","201509")
+
 #data読み込み
-hirano_1809 <- read.csv("population_201809_hirano.csv")
-hirano_1803 <- read.csv("population_201803_hirano.csv")
-hirano_1709 <- read.csv("population_201709_hirano.csv")
-hirano_1703 <- read.csv("population_201703_hirano.csv")
-hirano_1609 <- read.csv("population_201609_hirano.csv")
+#代入にはassign
+for(i in seq_along(time)){
+assign(paste("hirano_",time[i],sep=""),read.csv(paste("population_",time2[i],"_hirano",".csv",sep="")))
+}
 
 #男女別でなく合計の行rowだけでフィルタ
 hirano_1809　<- hirano_1809 %>% filter(男女別=="計")
@@ -48,7 +52,7 @@ ggplot(data=data)+
 	geom_line(aes(x=time,y=value,colour=area),show.legend=FALSE)+
 	geom_text(data=subset(data, time=="2018-09-01"),aes(x=time,y=value,label=area),size=2.8,nudge_x=50,family="Japan1GothicBBB")+
 	labs(title="平野区町丁目別人口（５歳）",x="時点",y="人口")+
-	theme_bw(base_family="Japan1GothicBBB")+
+	theme_bw(base_family="Japan1GothicBBB")
 
 
 #グラフファイル出力(PDF,png)

@@ -1,4 +1,109 @@
+#出力したCSVの前処理
+#１～７行目を削除
+
+#data読み込み
+data <- read.csv("*******.csv")
+
+#質問に対する回答の部分で、かつ設問６だけを取り出す
+data2 <- data[data$設問番号==6,]
+
+#自由記述の設問６だけを取り出す
+data3 <- data2[,7]
+
+#???????????
+#一緒にはできないのかな？
+datax <- data[data$設問番号==6,7]
+
+
+#自由回答部分のみをテキストで書き出し
+write.table(data3, "C:/Users/i*******/Desktop/output.txt", quote=F,
+		col.names=F, row.names=F)
+
+#package
+library(RMeCab)
+
+#単語の出現頻度を調べる
+
+#termのfreqencyを数える
+freq1 <- RMeCabFreq("output.txt")#集計までしてくれる
+
+#名詞と動詞のみを抽出
+freq2 <- subset(freq1, Info1 %in% c("名詞", "動詞", "形容詞"))
+
+#細分類（Info2）から不要なものを除外
+freq3 <- subset(freq2, !Info2 %in% c("数", "非自立", "接尾"))
+
+#decreasingで30個見てみる
+head(freq1[order(freq1$Freq,decreasing=T),],30)
+
+#出現頻度の高い単語でワードクラウド作成
+#ライブラリ
+library(wordcloud)
+library(dplyr)
+
+freq1 %>% head(40)
+
+#不要な単語を削除
+freq <- freq3[(!freq3$Term=="する"&
+		　  !freq3$Term=="ある"
+		   ),]
+
+#ワードクラウド
+wordcloud(  words=freq$Term, 
+		freq=freq$Freq,
+		min.freq=4,
+		color=brewer.pal(8, "Dark2"),
+		scale=c(7,1.5),#一番大きな形態素でフォントサイズ最大７、最小２で描写
+		family="IPAMincho",
+		random.order=TRUE
+	    )
+
+#Ngramによる解析
+#形態素の組み合わせの総数をカウント
+ngram <- NgramDF2("output.txt",type=1,pos=c("名詞","形容詞","動詞","副詞"),N=4,minFreq=3)
+ngram <- NgramDF2("output.txt",type=1,pos=c("名詞","形容詞","動詞"),N=4,minFreq=2)
+ngram <- NgramDF2("output.txt",type=1,pos=c("名詞"),N=3,minFreq=2)
+ngram[order(ngram$output.txt,decreasing=T),]
+
+ngram %>% head(decreasing=T)
+ngram %>% ngram[order(decreasing=T),]
+ngram[order(ngram$output.txt,decreasing=T),]
+
+
+
+
+
+#ngramをネットワーク可視化
+#ライブラリ
+library(igraph)
+
+#Ngramをグラフデータフレームに変換
+graph <- graph.data.frame(ngram)
+
+#描写
+plot(graph, 
+	vertex.label=V(graph)$name,
+	vertex.size=20, 
+	vertex.color="#e24565",
+	vertex.label.cex=.9,
+	edge.color="orange",
+	edge.lty=1,
+	)
+
+#otehr options
+layout=layout.grid
+vertex.shape="none"
+edge.arrow.size=0
+
+#plot guide
+#http://www.nemotos.net/igraph-tutorial/NetSciX_2016_Workshop_ja.html
+
+
+
+
+
 #テキストマイニング
+
 #2-6
 #前処理をしてから形態素解析
 #2-7形態素解析の基礎
@@ -195,3 +300,58 @@ wordcloud(part_wc$Term,part_wc$Freq,scale=c(7,1.5),max.words=Inf,random.order=T,
 
 #RColorBrewerパッケージで使用可能なパレットを一覧表示
 display.brewer.all()
+
+#2-19 ネガポジ分析
+#単語極性辞書がポイント、形態素一つ一つにポジティブどの点数がついているイメージ
+#辞書をいかに作る、取り込むか、がキーになる
+#じっさいにどうやってやるのかわからないやん
+
+
+#2-20 自動分類
+#クラスタ分析と多次元尺度法
+#termと文書行列を作成する関数としてdocMatrix
+#引数はディレクトリ（フォルダ）
+#各ファイルである形態素がどれくらいの割合で出現したか
+#数字の出方が似ているファイルは似ている
+#大量のテキストファイルをいくつかのグループに分類できる
+#ここから実際に
+#クラスタ分析と多次元尺度法
+#距離の算出（似ている度合い）を数字で表せる
+dist
+#引数にt
+#t、行列の転置（行列の入れ替え）を行う関数
+#canberraは距離を計算する手法の一つ
+#デンドログラム（樹形図）、dendrogram
+#多次元尺度法＝2次元で無理やり表記
+library(MASS)
+#距離を算出するところまでは上と共通
+
+result<-docMatrix("good_point",pos=c("名詞","動詞","形容詞"),weight="tf*idf*norm")
+result<-result[row.names(result) != "[[LESS-THAN-1]]",]
+result<-result[row.names(result) != "[[TOTAL-TOKENS]]",]
+result.dist<-dist(t(result),"canberra")
+result.clust<-hclust(result.dist,"ward.D2")
+plot(result.clust)
+lines(c(1,200),c(750,750),lty=2,lwd=2,col=2)
+
+c<-rect.hclust(result.clust,k=6)
+
+result<-docMatrix("bad_point",pos=c("名詞","動詞","形容詞"),weight="tf*idf*norm")
+result<-result[row.names(result) != "[[LESS-THAN-1]]",]
+result<-result[row.names(result) != "[[TOTAL-TOKENS]]",]
+result.dist<-dist(t(result),"canberra")
+result.clust<-hclust(result.dist,"ward.D2")
+plot(result.clust)
+lines(c(1,150),c(880,880),lty=2,lwd=2,col=2)
+
+c<-rect.hclust(result.clust,k=4)
+
+require(MASS)
+#result.samm<-sammon(result.dist)
+result.isoMDS<-isoMDS(result.dist)
+result.name<-unlist(strsplit(colnames(result),".txt"))
+#plot(result.samm$points,type="n")
+#text(result.samm$points,lab=result.name)
+plot(result.isoMDS$points,type="n")
+text(result.isoMDS$points,lab=result.name)
+

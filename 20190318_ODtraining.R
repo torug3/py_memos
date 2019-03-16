@@ -16,7 +16,7 @@ table(history$コース受講状況)
 #２．テスト
 #data読み込み
 #前処理しなくてもskipで不要な行は読み込まない
-history <- read.csv("********.csv", skip=4, fileEncoding="CP932")
+test <- read.csv("********.csv", skip=4, fileEncoding="CP932")
 
 
 #３．アンケート
@@ -30,7 +30,7 @@ table(questionnaire$設問番号)
 #時間のものはPOSIXct型に
 questionnaire$実施日時 <- as.POSIXct(questionnaire$実施日時, format="%Y/%m/%d %H:%M:%S", tz = "Japan")
 
-#テストの値は除去
+#テスト値は除去
 questionnaire <- questionnaire %>% filter(実施日時 > as.POSIXct("2019-02-04 00:00:00"))
 
 #アンケートの設問ごとで分割
